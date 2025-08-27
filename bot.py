@@ -5,8 +5,9 @@ from aiogram.utils import executor
 import json
 import os
 
-API_TOKEN = '8421310707:AAFe848LhaxXxkxtUyWx_C6vD88Zz04YUZI'
-GROUP_ID = -1003095304975
+# Берём данные из GitHub Secrets
+API_TOKEN = os.getenv('API_TOKEN')
+GROUP_ID = int(os.getenv('GROUP_ID'))
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
@@ -31,7 +32,12 @@ def get_next_request_number():
 
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
-    await message.answer("👋 Привет! Я бот сервиса «Ремонт холодильников Сызрань».\nЧерез меня можно оставить заявку на ремонт холодильника.\nНажмите кнопку ниже, чтобы начать.", reply_markup=kb)
+    await message.answer(
+        "👋 Привет! Я бот сервиса «Ремонт холодильников Сызрань».\n"
+        "Через меня можно оставить заявку на ремонт холодильника.\n"
+        "Нажмите кнопку ниже, чтобы начать.",
+        reply_markup=kb
+    )
 
 @dp.message_handler(lambda message: message.text == "Оставить заявку")
 async def start_request(message: types.Message):
@@ -58,7 +64,13 @@ async def get_problem(message: types.Message):
     user_data[message.from_user.id]['problem'] = message.text
     data = user_data.pop(message.from_user.id)
     request_number = get_next_request_number()
-    text = f"📌 Заявка #{request_number} 📌\nИмя: {data['name']}\nТелефон: {data['phone']}\nАдрес: {data['address']}\nПроблема: {data['problem']}"
+    text = (
+        f"📌 Заявка #{request_number} 📌\n"
+        f"Имя: {data['name']}\n"
+        f"Телефон: {data['phone']}\n"
+        f"Адрес: {data['address']}\n"
+        f"Проблема: {data['problem']}"
+    )
     await bot.send_message(GROUP_ID, text)
     await message.answer(f"✅ Ваша заявка №{request_number} отправлена! Мастер свяжется с вами скоро.")
 
